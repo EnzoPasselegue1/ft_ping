@@ -18,7 +18,7 @@ int     parse_args(int argc, char **argv, t_ping_config *config){
         return -1;
     }
 
-    while ((opt = getopt(argc, argv, "vh")) != -1) {
+    while ((opt = getopt(argc, argv, "v?")) != -1) {
         switch (opt) {
             case 'v':
                 config->verbose = 1;

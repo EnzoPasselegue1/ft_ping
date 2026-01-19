@@ -7,6 +7,7 @@
 # include<unistd.h>
 # include<signal.h>
 # include<errno.h>
+#include <getopt.h>
 # include<sys/types.h>
 # include<sys/socket.h>
 # include<sys/time.h>
@@ -17,8 +18,8 @@
 # include<netdb.h>
 # include<math.h>
 
-# define PACKET_SIZE64
-# define DATA_SIZE56
+# define PACKET_SIZE 64
+# define DATA_SIZE 56
 
 // Structures
 typedef struct s_ping_config {

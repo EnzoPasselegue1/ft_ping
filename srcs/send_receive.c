@@ -1,18 +1,17 @@
-#include "ft_ping.h"
+#include"ft_ping.h"
 
-int     send_ping(t_ping_config *config, t_ping_stats *stats)
-{
+int send_ping(t_ping_config *config, t_ping_stats *stats) {
     t_icmp_packet packet;
-    ssize_t bytes_sent;
+    int sent;
 
     build_icmp_packet(&packet, config);
 
-    bytes_sent = sendto(config->sockfd, &packet, sizeof(packet), 0,
-                        (struct sockaddr *)&config->dest_addr,
-                        sizeof(config->dest_addr));
-    if (bytes_sent < 0 || bytes_sent != sizeof(packet)) {
-        if (config->verbose)
-            perror("ft_ping: sendto");
+    sent = sendto(config->sockfd, &packet, sizeof(packet), 0,
+                  (struct sockaddr *)&config->dest_addr,
+                  sizeof(config->dest_addr));
+
+    if (sent < 0) {
+        perror("ft_ping: sendto");
         return -1;
     }
 
@@ -20,53 +19,49 @@ int     send_ping(t_ping_config *config, t_ping_stats *stats)
     return 0;
 }
 
-int     receive_ping(t_ping_config *config, t_ping_stats *stats)
-{
+int receive_ping(t_ping_config *config, t_ping_stats *stats,
+                 struct timeval *start) {
     char buffer[1024];
-    struct sockaddr_in addr;
-    socklen_t addr_len = sizeof(addr);
-    ssize_t bytes_received;
+    struct sockaddr_in from;
+    socklen_t fromlen = sizeof(from);
+    struct timeval end;
+    int received;
 
-    bytes_received = recvfrom(config->sockfd, buffer, sizeof(buffer), 0,
-                              (struct sockaddr *)&addr, &addr_len);
-    if (bytes_received < 0) {
-        if (config->verbose && (errno != EAGAIN && errno != EWOULDBLOCK))
-            perror("ft_ping: recvfrom");
+    received = recvfrom(config->sockfd, buffer, sizeof(buffer), 0,
+                        (struct sockaddr *)&from, &fromlen);
+
+    gettimeofday(&end, NULL);
+
+    if (received < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // Timeout
+            return -1;
+        }
+        perror("ft_ping: recvfrom");
         return -1;
     }
 
-    struct iphdr *ip_header = (struct iphdr *)buffer;
-    t_icmp_packet *icmp_packet = (t_icmp_packet *)(buffer + (ip_header->ihl * 4));
+    // Parser la réponse
+    struct iphdr *ip_hdr = (struct iphdr *)buffer;
+    int ip_hdr_len = ip_hdr->ihl * 4;
+    struct icmphdr *icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
 
-    if (icmp_packet->header.type == ICMP_ECHOREPLY &&
-        ntohs(icmp_packet->header.un.echo.id) == config->pid) {
-        struct timeval *send_time = (struct timeval *)icmp_packet->data;
-        struct timeval recv_time, rtt_time;
-        gettimeofday(&recv_time, NULL);
+    // Vérifier que c'est bien notre paquet
+    if (icmp_hdr->type == ICMP_ECHOREPLY &&
+        icmp_hdr->un.echo.id == config->pid &&
+        icmp_hdr->un.echo.sequence == config->seq) {
 
-        timersub(&recv_time, send_time, &rtt_time);
-        double rtt = rtt_time.tv_sec * 1000.0 + rtt_time.tv_usec / 1000.0;
+        double rtt = calculate_rtt(start, &end);
+        update_stats(stats, rtt);
+        print_reply(config, received - ip_hdr_len, rtt, ip_hdr->ttl);
 
         stats->received++;
-        stats->sum_rtt += rtt;
-        stats->sum_rtt_sq += rtt * rtt;
-        if (stats->min_rtt < 0 || rtt < stats->min_rtt)
-            stats->min_rtt = rtt;
-        if (rtt > stats->max_rtt)
-            stats->max_rtt = rtt;
-
-        if (config->verbose) {
-            char addr_str[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &addr.sin_addr, addr_str, sizeof(addr_str));
-            printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.2f ms\n",
-                   bytes_received - (ip_header->ihl * 4),
-                   addr_str,
-                   ntohs(icmp_packet->header.un.echo.sequence),
-                   ip_header->ttl,
-                   rtt);
-        }
         return 0;
     }
 
+    // Autres types ICMP (en mode verbose)
+    if (config->verbose) {
+        print_error(config, icmp_hdr->type, icmp_hdr->code);
+    }
     return -1;
 }

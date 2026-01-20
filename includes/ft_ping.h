@@ -64,8 +64,7 @@ uint16_t calculate_checksum(void *data, int len);
 
 // send_receive.c
 int     send_ping(t_ping_config *config, t_ping_stats *stats);
-int     receive_ping(t_ping_config *config, t_ping_stats *stats,
-                     struct timeval *start);
+int     receive_ping(t_ping_config *config, t_ping_stats *stats, struct timeval *start);
 
 // timing.c
 double  calculate_rtt(struct timeval *start, struct timeval *end);

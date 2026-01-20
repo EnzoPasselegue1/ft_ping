@@ -4,16 +4,16 @@ CC = gcc
 CFLAGS = -D_POSIX_C_SOURCE=200112L -I./includes
 LDFLAGS = -lm
 
-SRCS = srcs/main.c\
-       srcs/parser.c\
-       srcs/dns.c
-#       srcs/socket.c\
-#       srcs/icmp.c\
-#       srcs/send_receive.c\
-#       srcs/timing.c\
-#       srcs/stats.c\
-#       srcs/signal.c\
-#       srcs/display.c\
+SRCS = srcs/main.c \
+       srcs/parser.c \
+       srcs/dns.c \
+       srcs/socket.c \
+       srcs/icmp.c 
+#       srcs/send_receive.c \
+#       srcs/timing.c \
+#       srcs/stats.c \
+#       srcs/signal.c \
+#       srcs/display.c \
 #       srcs/utils.c
 
 OBJS = $(SRCS:.c=.o)

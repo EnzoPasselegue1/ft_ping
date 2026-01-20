@@ -5,7 +5,7 @@ void    print_help(void) {
     printf("Send ICMP ECHO_REQUEST to network hosts.\n\n");
     printf("Options:\n");
     printf("  -v            Verbose output\n");
-    printf("  -h            Show this help message\n");
+    printf("  -?            Show this help message\n");
     exit(0);
 }
 

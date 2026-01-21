@@ -10,8 +10,8 @@ SRCS = srcs/main.c \
        srcs/socket.c \
        srcs/icmp.c \
        srcs/send_receive.c \
-	   srcs/display.c 
-#       srcs/timing.c \
+	   srcs/display.c \
+       srcs/timing.c
 #       srcs/stats.c \
 #       srcs/signal.c \
 

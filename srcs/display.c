@@ -31,19 +31,3 @@ void print_error(t_ping_config *config, int type, int code) {
     }
     printf("\n");
 }
-
-void update_stats(t_ping_stats *stats, double rtt) {
-    if (rtt < stats->min_rtt)
-        stats->min_rtt = rtt;
-    if (rtt > stats->max_rtt)
-        stats->max_rtt = rtt;
-
-    stats->sum_rtt += rtt;
-    stats->sum_rtt_sq += rtt * rtt;
-}
-
-double calculate_rtt(struct timeval *start, struct timeval *end) {
-    double start_ms = start->tv_sec * 1000.0 + start->tv_usec / 1000.0;
-    double end_ms = end->tv_sec * 1000.0 + end->tv_usec / 1000.0;
-    return end_ms - start_ms;
-}

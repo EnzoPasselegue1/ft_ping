@@ -11,9 +11,9 @@ SRCS = srcs/main.c \
        srcs/icmp.c \
        srcs/send_receive.c \
 	   srcs/display.c \
-       srcs/timing.c
-#       srcs/stats.c \
-#       srcs/signal.c \
+       srcs/timing.c \
+       srcs/stats.c \
+       srcs/signal.c
 
 #       srcs/utils.c
 

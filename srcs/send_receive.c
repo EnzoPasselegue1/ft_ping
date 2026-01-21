@@ -26,31 +26,43 @@ int receive_ping(t_ping_config *config, t_ping_stats *stats,
     socklen_t fromlen = sizeof(from);
     struct timeval end;
     int received;
+    int max_attempts = 10;
+    int attempts = 0;
 
-    received = recvfrom(config->sockfd, buffer, sizeof(buffer), 0,
-                        (struct sockaddr *)&from, &fromlen);
+    while (attempts++ < max_attempts) {
+        fromlen = sizeof(from);
+        
+        received = recvfrom(config->sockfd, buffer, sizeof(buffer), 0,
+                            (struct sockaddr *)&from, &fromlen);
 
-    gettimeofday(&end, NULL);
-
-    if (received < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // Timeout
+        if (received < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return -1;
+            }
+            if (config->verbose)
+                perror("ft_ping: recvfrom");
             return -1;
         }
-        perror("ft_ping: recvfrom");
-        return -1;
-    }
 
-    // Parser la réponse
-    struct iphdr *ip_hdr = (struct iphdr *)buffer;
-    int ip_hdr_len = ip_hdr->ihl * 4;
-    struct icmphdr *icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
+        gettimeofday(&end, NULL);
 
-    // Vérifier que c'est bien notre paquet
-    if (icmp_hdr->type == ICMP_ECHOREPLY &&
-        icmp_hdr->un.echo.id == config->pid &&
-        icmp_hdr->un.echo.sequence == config->seq) {
+        struct iphdr *ip_hdr = (struct iphdr *)buffer;
+        int ip_hdr_len = ip_hdr->ihl * 4;
+        struct icmphdr *icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
 
+        // Ignorer les echo requests
+        if (icmp_hdr->type == ICMP_ECHO) {
+            continue;
+        }
+
+        // Ignorer les paquets qui ne sont pas pour nous
+        if (icmp_hdr->type != ICMP_ECHOREPLY ||
+            ntohs(icmp_hdr->un.echo.id) != config->pid ||
+            ntohs(icmp_hdr->un.echo.sequence) != config->seq) {
+            continue;
+        }
+
+        // C'est notre réponse !
         double rtt = calculate_rtt(start, &end);
         update_stats(stats, rtt);
         print_reply(config, received - ip_hdr_len, rtt, ip_hdr->ttl);
@@ -59,9 +71,5 @@ int receive_ping(t_ping_config *config, t_ping_stats *stats,
         return 0;
     }
 
-    // Autres types ICMP (en mode verbose)
-    if (config->verbose) {
-        print_error(config, icmp_hdr->type, icmp_hdr->code);
-    }
     return -1;
 }

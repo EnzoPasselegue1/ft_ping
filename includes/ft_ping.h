@@ -68,6 +68,7 @@ int     receive_ping(t_ping_config *config, t_ping_stats *stats, struct timeval 
 
 // timing.c
 double  calculate_rtt(struct timeval *start, struct timeval *end);
+double  timeval_to_ms(struct timeval *tv);
 
 // stats.c
 void    init_stats(t_ping_stats *stats);
@@ -80,10 +81,6 @@ void    setup_signals(void);
 // display.c
 void    print_reply(t_ping_config *config, int bytes, double rtt, int ttl);
 void    print_error(t_ping_config *config, int type, int code);
-
-// utils.c
-void    error_exit(const char *msg);
-double  timeval_to_ms(struct timeval *tv);
 
 // Global
 extern volatile sig_atomic_t g_running;

@@ -1,7 +1,7 @@
 #include"ft_ping.h"
 
 void print_reply(t_ping_config *config, int bytes, double rtt, int ttl) {
-    printf("%d bytes from%s (%s): icmp_seq=%d ttl=%d time=%.3f ms\n",
+    printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3f ms\n",
            bytes,
            config->hostname,
            config->resolved_ip,
@@ -11,7 +11,7 @@ void print_reply(t_ping_config *config, int bytes, double rtt, int ttl) {
 }
 
 void print_error(t_ping_config *config, int type, int code) {
-    printf("From%s icmp_seq=%d ",
+    printf("From %s icmp_seq=%d ",
            config->resolved_ip, config->seq);
 
     switch (type) {

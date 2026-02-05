@@ -31,7 +31,7 @@ int receive_ping(t_ping_config *config, t_ping_stats *stats,
 
     while (attempts++ < max_attempts) {
         fromlen = sizeof(from);
-        
+
         received = recvfrom(config->sockfd, buffer, sizeof(buffer), 0,
                             (struct sockaddr *)&from, &fromlen);
 
@@ -62,7 +62,6 @@ int receive_ping(t_ping_config *config, t_ping_stats *stats,
             continue;
         }
 
-        // C'est notre réponse !
         double rtt = calculate_rtt(start, &end);
         update_stats(stats, rtt);
         print_reply(config, received - ip_hdr_len, rtt, ip_hdr->ttl);

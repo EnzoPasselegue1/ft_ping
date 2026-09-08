@@ -20,6 +20,10 @@
 
 # define PACKET_SIZE 64
 # define DATA_SIZE 56
+// Size of the IPv4 header (no options), used only to display the total
+// on-the-wire packet size in the "PING host (ip) data(total) bytes..." line,
+// like the reference ping (inetutils-2.0): data + ICMP header + IP header.
+# define IP_HEADER_SIZE ((int)sizeof(struct iphdr))
 
 // Structures
 typedef struct s_ping_config {
@@ -64,6 +68,8 @@ uint16_t calculate_checksum(void *data, int len);
 
 // send_receive.c
 int     send_ping(t_ping_config *config, t_ping_stats *stats);
+// Returns 0 on a matching echo reply (printed), 1 on an ICMP error packet
+// for our probe (printed via print_error), -1 on timeout/no reply.
 int     receive_ping(t_ping_config *config, t_ping_stats *stats, struct timeval *start);
 
 // timing.c
@@ -80,7 +86,7 @@ void    setup_signals(void);
 
 // display.c
 void    print_reply(t_ping_config *config, int bytes, double rtt, int ttl);
-void    print_error(t_ping_config *config, int type, int code);
+void    print_error(t_ping_config *config, const char *from_ip, int type, int code);
 
 // Global
 extern volatile sig_atomic_t g_running;

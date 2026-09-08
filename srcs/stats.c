@@ -25,8 +25,8 @@ void    print_stats(t_ping_config *config, t_ping_stats *stats)
     double total_time = calculate_rtt(&stats->start_time, &end);
     double loss_percent = 100.0 * (stats->transmitted - stats->received) / stats->transmitted;
 
-    printf("\n---%s ping statistics ---\n", config->hostname);
-    printf("%d packets transmitted,%d received,%.0f%% packet loss, time%.0fms\n", stats->transmitted, stats->received, loss_percent, total_time);
+    printf("\n--- %s ping statistics ---\n", config->hostname);
+    printf("%d packets transmitted, %d received, %.0f%% packet loss, time %.0fms\n", stats->transmitted, stats->received, loss_percent, total_time);
 
     if (stats->received > 0)
     {

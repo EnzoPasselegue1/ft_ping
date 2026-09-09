@@ -15,8 +15,6 @@ SRCS = srcs/main.c \
        srcs/stats.c \
        srcs/signal.c
 
-#       srcs/utils.c
-
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)

@@ -7,7 +7,7 @@
 # include<unistd.h>
 # include<signal.h>
 # include<errno.h>
-#include <getopt.h>
+# include <getopt.h>
 # include<sys/types.h>
 # include<sys/socket.h>
 # include<sys/select.h>

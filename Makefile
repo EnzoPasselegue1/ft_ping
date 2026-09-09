@@ -1,7 +1,7 @@
 NAME = ft_ping
 
 CC = gcc
-CFLAGS = -D_POSIX_C_SOURCE=200112L -I./includes
+CFLAGS = -std=c99 -D_POSIX_C_SOURCE=200112L -I./includes
 LDFLAGS = -lm
 
 SRCS = srcs/main.c \

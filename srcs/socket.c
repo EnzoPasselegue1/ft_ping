@@ -23,5 +23,17 @@ int create_socket(t_ping_config *config) {
         return -1;
     }
 
+    // Demande au noyau de nous remonter, via la file d'erreurs du socket
+    // (recvmsg(..., MSG_ERRQUEUE) dans receive_ping), les échecs qu'il
+    // détecte lui-même avant même d'émettre (ex: résolution ARP impossible
+    // sur le sous-réseau local) — ces erreurs-là n'arrivent jamais par un
+    // recvfrom() classique.
+    int on = 1;
+    if (setsockopt(config->sockfd, IPPROTO_IP, IP_RECVERR, &on, sizeof(on)) < 0) {
+        perror("ft_ping: setsockopt(IP_RECVERR)");
+        close(config->sockfd);
+        return -1;
+    }
+
     return 0;
 }

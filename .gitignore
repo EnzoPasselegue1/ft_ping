@@ -1,0 +1,6 @@
+# Build artifacts
+*.o
+/ft_ping
+
+# Local-only validation scripts (kept on disk, not part of the submission)
+/tests/

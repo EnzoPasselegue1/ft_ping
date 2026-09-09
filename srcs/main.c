@@ -32,29 +32,27 @@ int main(int argc, char **argv) {
            config.hostname,
            config.resolved_ip,
            DATA_SIZE,
-           PACKET_SIZE);
+           PACKET_SIZE + IP_HEADER_SIZE);
 
-    int max_count = 3;
-    int count = 0;
-
-    while (g_running && count < max_count) {
+    // Like the reference ping, there is no default packet count: we keep
+    // sending until the user interrupts us with CTRL+C (g_running is
+    // cleared by the SIGINT handler in signal.c).
+    while (g_running) {
         struct timeval start;
         gettimeofday(&start, NULL);
 
         if (send_ping(&config, &stats) < 0)
             break;
-        
-        if (receive_ping(&config, &stats, &start) != 0) {
+
+        if (receive_ping(&config, &stats, &start) < 0) {
             if (config.verbose)
                 printf("Request timeout for icmp_seq %d\n", config.seq);
         }
-        
+
         config.seq++;
-        count++;
-        
-        if (count < max_count && g_running) {
+
+        if (g_running)
             sleep(1);
-        }
     }
 
     print_stats(&config, &stats);
